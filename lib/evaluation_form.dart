@@ -708,9 +708,9 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
             [item['first_name']?.toString(), item['last_name']?.toString()]
                 .where((part) => part != null && part.isNotEmpty)
                 .join(' ');
-        final id = item['user_id']?.toString() ??
+        final id = item['scholar_id']?.toString() ??
+            item['user_id']?.toString() ??
             item['id']?.toString() ??
-            item['scholar_id']?.toString() ??
             '';
         return DropdownMenuItem(
           value: id,
