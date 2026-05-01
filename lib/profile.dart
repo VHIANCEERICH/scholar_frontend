@@ -68,20 +68,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     try {
-      final results = await Future.wait([
-        BackendApi.getJson(
-          'get_scholar_profile.php',
-          query: {'user_id': widget.userId},
-        ),
-        BackendApi.getJson(
-          'get_sa_stats.php',
-          query: {'user_id': widget.userId},
-        ),
-        BackendApi.getJson('get_monitoring_summary.php'),
-      ]);
-      final payload = results[0];
-      final statsPayload = results[1];
-      final monitoringPayload = results[2];
+      final payload = await BackendApi.getJson(
+        'get_scholar_profile.php',
+        query: {'user_id': widget.userId},
+      );
+      final statsPayload = await BackendApi.getJson(
+        'get_sa_stats.php',
+        query: {'user_id': widget.userId},
+      );
+      final monitoringPayload = await _tryGetMonitoringSummary();
       final profile = Map<String, dynamic>.from(
         payload['profile'] as Map? ?? const <String, dynamic>{},
       );
@@ -183,6 +178,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading = false;
         });
       }
+    }
+  }
+
+  Future<Map<String, dynamic>> _tryGetMonitoringSummary() async {
+    try {
+      return await BackendApi.getJson(
+        'get_monitoring_summary.php',
+        timeout: const Duration(seconds: 8),
+        retries: 0,
+      );
+    } catch (_) {
+      return const <String, dynamic>{};
     }
   }
 

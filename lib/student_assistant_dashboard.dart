@@ -57,21 +57,15 @@ class _StudentAssistantDashboardState extends State<StudentAssistantDashboard> {
     }
 
     try {
-      final results = await Future.wait([
-        BackendApi.getJson(
-          'get_sa_stats.php',
-          query: {'user_id': widget.userId},
-        ),
-        BackendApi.getJson(
-          'get_scholar_profile.php',
-          query: {'user_id': widget.userId},
-        ),
-        BackendApi.getJson('get_monitoring_summary.php'),
-      ]);
-
-      final data = results[0];
-      final profilePayload = results[1];
-      final monitoringPayload = results[2];
+      final data = await BackendApi.getJson(
+        'get_sa_stats.php',
+        query: {'user_id': widget.userId},
+      );
+      final profilePayload = await BackendApi.getJson(
+        'get_scholar_profile.php',
+        query: {'user_id': widget.userId},
+      );
+      final monitoringPayload = await _tryGetMonitoringSummary();
       final profile = Map<String, dynamic>.from(
         profilePayload['profile'] as Map? ?? const <String, dynamic>{},
       );
@@ -122,6 +116,18 @@ class _StudentAssistantDashboardState extends State<StudentAssistantDashboard> {
         _errorMessage =
             'Unable to refresh dashboard data right now. Please try again.';
       });
+    }
+  }
+
+  Future<Map<String, dynamic>> _tryGetMonitoringSummary() async {
+    try {
+      return await BackendApi.getJson(
+        'get_monitoring_summary.php',
+        timeout: const Duration(seconds: 8),
+        retries: 0,
+      );
+    } catch (_) {
+      return const <String, dynamic>{};
     }
   }
 
