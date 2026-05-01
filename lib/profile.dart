@@ -68,20 +68,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     try {
-      final results = await Future.wait([
-        BackendApi.getJson(
-          'get_scholar_profile.php',
-          query: {'user_id': widget.userId},
-        ),
-        BackendApi.getJson(
-          'get_sa_stats.php',
-          query: {'user_id': widget.userId},
-        ),
-        BackendApi.getJson('get_monitoring_summary.php'),
-      ]);
-      final payload = results[0];
-      final statsPayload = results[1];
-      final monitoringPayload = results[2];
+      final payload = await BackendApi.getJson(
+        'get_scholar_profile.php',
+        query: {'user_id': widget.userId},
+      );
+      final statsPayload = await BackendApi.getJson(
+        'get_sa_stats.php',
+        query: {'user_id': widget.userId},
+      );
+      final monitoringPayload = await _tryGetMonitoringSummary();
       final profile = Map<String, dynamic>.from(
         payload['profile'] as Map? ?? const <String, dynamic>{},
       );
@@ -183,6 +178,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading = false;
         });
       }
+    }
+  }
+
+  Future<Map<String, dynamic>> _tryGetMonitoringSummary() async {
+    try {
+      return await BackendApi.getJson(
+        'get_monitoring_summary.php',
+        timeout: const Duration(seconds: 8),
+        retries: 0,
+      );
+    } catch (_) {
+      return const <String, dynamic>{};
     }
   }
 
@@ -567,28 +574,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
           FilledButton(
             onPressed: () async {
               try {
+                final body = <String, String>{
+                  'user_id': widget.userId.toString(),
+                  'first_name': firstController.text.trim(),
+                  'middle_name': middleController.text.trim(),
+                  'last_name': lastController.text.trim(),
+                  'course': courseController.text.trim(),
+                  'year_level': yearController.text.trim().isEmpty
+                      ? '1'
+                      : yearController.text.trim(),
+                  // Keep older backend deployments from attempting to store an
+                  // empty academic_type into enum-like columns.
+                  'academic_type': 'A',
+                };
+
+                if (isStudentAssistant) {
+                  body['assigned_area'] = areaController.text.trim();
+                }
+
+                if (isGift) {
+                  body['gift_type'] =
+                      ScholarshipTypes.giftTypePayload(selectedGift);
+                  body['grant_coverage'] =
+                      grantCoverageController.text.trim();
+                  body['gpa'] = retentionGwaController.text.trim();
+                  body['scholarship_status'] =
+                      renewalStatusController.text.trim();
+                }
+
                 final response = await BackendApi.postForm(
                   'update_profile.php',
-                  body: {
-                    'user_id': widget.userId.toString(),
-                    'first_name': firstController.text.trim(),
-                    'middle_name': middleController.text.trim(),
-                    'last_name': lastController.text.trim(),
-                    'course': courseController.text.trim(),
-                    'year_level': yearController.text.trim().isEmpty
-                        ? '1'
-                        : yearController.text.trim(),
-                    'assigned_area':
-                        isStudentAssistant ? areaController.text.trim() : '',
-                    'gift_type': isGift
-                        ? ScholarshipTypes.giftTypePayload(selectedGift)
-                        : '',
-                    'grant_coverage':
-                        isGift ? grantCoverageController.text.trim() : '',
-                    'gpa': isGift ? retentionGwaController.text.trim() : '',
-                    'scholarship_status':
-                        isGift ? renewalStatusController.text.trim() : '',
-                  },
+                  body: body,
                 );
                 if ((response['status'] ?? '').toString().toLowerCase() !=
                     'success') {

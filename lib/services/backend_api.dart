@@ -387,9 +387,17 @@ class BackendApi {
     final decoded = json.decode(body);
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      if (decoded is Map &&
-          (decoded.containsKey('status') || decoded.containsKey('message'))) {
-        return decoded;
+      if (decoded is Map) {
+        final payload = Map<String, dynamic>.from(decoded);
+        final message = extractFirstString(
+          payload,
+          const ['message', 'detail', 'error'],
+        );
+        throw Exception(
+          message.isNotEmpty
+              ? 'HTTP ${response.statusCode}: $message'
+              : 'HTTP ${response.statusCode}: $body',
+        );
       }
       throw Exception('HTTP ${response.statusCode}: $body');
     }
