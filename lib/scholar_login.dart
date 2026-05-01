@@ -211,6 +211,18 @@ class _ScholarLoginScreenState extends State<ScholarLoginScreen> {
   }
 
   String _buildConnectionErrorMessage(Object error) {
+    if (error is Exception) {
+      final message = error.toString();
+      if (message.contains('HTTP 404: User not found')) {
+        return 'User not found. Check the exact email or username in your local database.';
+      }
+      if (message.contains('HTTP 401: Invalid password')) {
+        return 'Invalid password.';
+      }
+      if (message.contains('HTTP 403: User account is inactive')) {
+        return 'User account is inactive.';
+      }
+    }
     if (error is ClientException) {
       return 'Connection Error: Chrome blocked the request to ${ApiConfig.baseUrl}. '
           'For `flutter run -d chrome`, enable CORS on the PHP server or serve the built web app from Apache/XAMPP.';
