@@ -475,10 +475,10 @@ class _AcademicProfileScreenState extends State<AcademicProfileScreen> {
           FilledButton(
             onPressed: () async {
               try {
-                await BackendApi.postJson(
+                final response = await BackendApi.postForm(
                   'update_profile.php',
                   body: {
-                    'user_id': widget.userId,
+                    'user_id': widget.userId.toString(),
                     'first_name': firstController.text.trim(),
                     'middle_name': middleController.text.trim(),
                     'last_name': lastController.text.trim(),
@@ -492,6 +492,14 @@ class _AcademicProfileScreenState extends State<AcademicProfileScreen> {
                     'monthly_stipend': stipendController.text.trim(),
                   },
                 );
+                if ((response['status'] ?? '').toString().toLowerCase() !=
+                    'success') {
+                  throw Exception(
+                    (response['message'] ?? 'Failed to save profile changes.')
+                        .toString(),
+                  );
+                }
+                BackendApi.invalidateCache(pathContains: 'get_scholar_profile.php');
                 if (!context.mounted) return;
                 Navigator.pop(context);
                 await _loadProfile();
