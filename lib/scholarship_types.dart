@@ -1,7 +1,6 @@
 class ScholarshipTypes {
   static const Map<String, String> giftTypeOptions = {
-    'Datu Pamulingan (IP Member)': 'ip_member',
-    'Persons with Disability (PWD)': 'pwd',
+    'Kingdom of Jesus Christ (KOJC Member)': 'ip_member',
   };
 
   static final Map<String, String> giftTypeLabelsByValue = Map.fromEntries(
@@ -9,8 +8,7 @@ class ScholarshipTypes {
   );
 
   static const List<String> giftTypeLabels = [
-    'Datu Pamulingan (IP Member)',
-    'Persons with Disability (PWD)',
+    'Kingdom of Jesus Christ (KOJC Member)',
   ];
 
   static String giftTypeLabel(dynamic raw) {
@@ -19,22 +17,22 @@ class ScholarshipTypes {
     if (giftTypeLabelsByValue.containsKey(value)) {
       return giftTypeLabelsByValue[value]!;
     }
-    if (value.contains('ip') || value.contains('pamulingan')) {
-      return 'Datu Pamulingan (IP Member)';
-    }
-    if (value.contains('pwd') || value.contains('disability')) {
-      return 'Persons with Disability (PWD)';
+    if (value.contains('ip') ||
+        value.contains('kojc') ||
+        value.contains('kingdom of jesus christ')) {
+      return 'Kingdom of Jesus Christ (KOJC Member)';
     }
     return '';
   }
 
   static String giftTypePayload(String label) {
     final value = label.toLowerCase().trim();
-    if (value.contains('pamulingan') || value.contains('ip member') || value == 'ip') {
+    if (value.contains('pamulingan') ||
+        value.contains('ip member') ||
+        value.contains('kojc') ||
+        value.contains('kingdom of jesus christ') ||
+        value == 'ip') {
       return 'ip_member';
-    }
-    if (value.contains('pwd') || value.contains('disability')) {
-      return 'pwd';
     }
     return '';
   }
@@ -45,11 +43,10 @@ class ScholarshipTypes {
     if (value.contains('pamulingan') ||
         value.contains('ip_member') ||
         value.contains('ip member') ||
+        value.contains('kojc') ||
+        value.contains('kingdom of jesus christ') ||
         value == 'ip') {
       return 'ip_member';
-    }
-    if (value.contains('pwd') || value.contains('disability')) {
-      return 'pwd';
     }
     return '';
   }
