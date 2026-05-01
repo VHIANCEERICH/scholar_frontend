@@ -542,12 +542,10 @@ class _AcademicProfileScreenState extends State<AcademicProfileScreen> {
   }
 
   String _academicPayload(String label) {
-    final value = label.trim();
-    if (value.isEmpty) return 'Type A';
-    if (value.toUpperCase() == 'A') return 'Type A';
-    if (value.toUpperCase() == 'B') return 'Type B';
-    if (value.toUpperCase() == 'C') return 'Type C';
-    return value;
+    final value = label.trim().toUpperCase();
+    if (value == 'TYPE B' || value == 'B') return 'B';
+    if (value == 'TYPE C' || value == 'C') return 'C';
+    return 'A';
   }
 
   InputDecoration _modalInputDecoration(String label) {
