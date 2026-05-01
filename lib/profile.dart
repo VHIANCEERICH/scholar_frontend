@@ -567,28 +567,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
           FilledButton(
             onPressed: () async {
               try {
+                final body = <String, String>{
+                  'user_id': widget.userId.toString(),
+                  'first_name': firstController.text.trim(),
+                  'middle_name': middleController.text.trim(),
+                  'last_name': lastController.text.trim(),
+                  'course': courseController.text.trim(),
+                  'year_level': yearController.text.trim().isEmpty
+                      ? '1'
+                      : yearController.text.trim(),
+                };
+
+                if (isStudentAssistant) {
+                  body['assigned_area'] = areaController.text.trim();
+                }
+
+                if (isGift) {
+                  body['gift_type'] =
+                      ScholarshipTypes.giftTypePayload(selectedGift);
+                  body['grant_coverage'] =
+                      grantCoverageController.text.trim();
+                  body['gpa'] = retentionGwaController.text.trim();
+                  body['scholarship_status'] =
+                      renewalStatusController.text.trim();
+                }
+
                 final response = await BackendApi.postForm(
                   'update_profile.php',
-                  body: {
-                    'user_id': widget.userId.toString(),
-                    'first_name': firstController.text.trim(),
-                    'middle_name': middleController.text.trim(),
-                    'last_name': lastController.text.trim(),
-                    'course': courseController.text.trim(),
-                    'year_level': yearController.text.trim().isEmpty
-                        ? '1'
-                        : yearController.text.trim(),
-                    'assigned_area':
-                        isStudentAssistant ? areaController.text.trim() : '',
-                    'gift_type': isGift
-                        ? ScholarshipTypes.giftTypePayload(selectedGift)
-                        : '',
-                    'grant_coverage':
-                        isGift ? grantCoverageController.text.trim() : '',
-                    'gpa': isGift ? retentionGwaController.text.trim() : '',
-                    'scholarship_status':
-                        isGift ? renewalStatusController.text.trim() : '',
-                  },
+                  body: body,
                 );
                 if ((response['status'] ?? '').toString().toLowerCase() !=
                     'success') {
