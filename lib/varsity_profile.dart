@@ -441,6 +441,9 @@ class _VarsityProfileScreenState extends State<VarsityProfileScreen> {
                     'year_level': yearController.text.trim().isEmpty
                         ? '1'
                         : yearController.text.trim(),
+                    // Keep older backend deployments from attempting to store
+                    // an empty academic_type into enum-like columns.
+                    'academic_type': 'A',
                     'sport_type': sportController.text.trim(),
                     'head_coach': headCoachController.text.trim(),
                     'training_schedule': trainingScheduleController.text.trim(),

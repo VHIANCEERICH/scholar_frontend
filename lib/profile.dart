@@ -576,6 +576,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   'year_level': yearController.text.trim().isEmpty
                       ? '1'
                       : yearController.text.trim(),
+                  // Keep older backend deployments from attempting to store an
+                  // empty academic_type into enum-like columns.
+                  'academic_type': 'A',
                 };
 
                 if (isStudentAssistant) {
