@@ -1735,7 +1735,7 @@ class _MonitoringScreenState extends State<MonitoringScreen>
   }
 
   Widget _buildVarsityDetailsTable(List<Map<String, dynamic>> scholars) {
-    final rows = scholars.map((s) {
+    final rows = _collapseVarsityTeams(scholars).map((s) {
       final userId = _userId(s);
       final name = _fullName(s);
       final headCoach = (s['head_coach'] ?? '—').toString();
@@ -1840,6 +1840,43 @@ class _MonitoringScreenState extends State<MonitoringScreen>
         ),
       ),
     );
+  }
+
+  List<Map<String, dynamic>> _collapseVarsityTeams(
+    List<Map<String, dynamic>> scholars,
+  ) {
+    final teams = <String, Map<String, dynamic>>{};
+
+    bool hasValue(dynamic value) {
+      final text = (value ?? '').toString().trim().toLowerCase();
+      return text.isNotEmpty && text != 'â€”' && text != '-' && text != 'null';
+    }
+
+    int score(Map<String, dynamic> scholar) {
+      var total = 0;
+      if (hasValue(scholar['head_coach'])) total++;
+      if (hasValue(scholar['training_schedule'])) total++;
+      if (hasValue(scholar['game_schedule'])) total++;
+      return total;
+    }
+
+    for (final scholar in scholars) {
+      final sport = (scholar['sport_type'] ?? '').toString().trim();
+      if (sport.isEmpty || sport == 'â€”' || sport == '-') continue;
+
+      final key = sport.toLowerCase();
+      final existing = teams[key];
+      if (existing == null || score(scholar) > score(existing)) {
+        teams[key] = Map<String, dynamic>.from(scholar);
+      }
+    }
+
+    final collapsed = teams.values.toList(growable: false);
+    collapsed.sort((a, b) => (a['sport_type'] ?? '')
+        .toString()
+        .toLowerCase()
+        .compareTo((b['sport_type'] ?? '').toString().toLowerCase()));
+    return collapsed;
   }
 
   void _showAcademicDetailsDialog({
