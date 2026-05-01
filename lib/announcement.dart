@@ -72,6 +72,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
           if (selectedAudience == 'Specific Scholar')
             'target_user_id': _selectedScholarId ?? '',
         },
+        timeout: const Duration(seconds: 45),
+        retries: 1,
       );
       final success = decoded['success'] == true ||
           decoded['status']?.toString().toLowerCase() == 'success';
